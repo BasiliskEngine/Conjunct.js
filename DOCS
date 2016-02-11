@@ -1,0 +1,84 @@
+=============
+Documentation
+=============
+
+Algorithm calculates a hash string that can serve as a random key for generating CSRF tokens.
+This key's length can range from (57-64) characters (including hyphens), and the algorithm is broken up into 8 different
+semi-functions (semis) that calculate a different section of the key. In order to remove predictability
+of different components of the key, some of the components will never have a fixed length. However, some
+of the separate component lengths are dependent on that of another component, as well as those values. In addition,
+in order to ensure that some components cannot be differentiated, the hyphens in the key can be removed. Other components 
+(such as the fixed-length symbol component), will always be obvious due to their reoccurrence. This documentation will explain
+each of the 8 functions that calculate the different key components.
+
+
+# Segment Headers
+	To calculate the value of each component in the key, the algorithm consults "segment headers", or just a library
+	of characters that can be inserted into a key component to determine the value. The algorithm contains 3 segment headers
+	that contain a variety of different characters that can be selected for each different component. The three segment headers
+	are as follows: the ASH, the NSH, and the SSH. These are the Alpha Segment Headers, the Numeric Segment Headers, and the
+	Symbolic Segment Headers. In the original code, they are organized into three referencable strings with the following values:
+
+	ASH: abcdefghijklmnopqrstuvwxyz
+	NSH: 0123456789
+	SSH: @#$%!^&*()=+/
+
+# Component 1
+	Component 1 has an unfixed length. It's length can range from 3 to 5 characters, also with the off chance that the length 
+	is 2 characters. The chance of a 2-length first component is 1/1000 and a 1/100 chance of a 3-length first component, as values from the NSH range from 0-9, and every '0'
+	character from the NSH is omitted (you will never find a '0' in a hash). To calculate the first component, a single random
+	character from the NSH is appended to the key. Like explained, if this NSH character happens to be a '0', it must be omitted
+	resulting in an alphabetic first character of the key. Next, the algorithm exectues a commited loop in which 4 characters are
+	appended to the key. During this loop, the current iteration is calculated as i. On even iterations of i (including 0), a character
+	from the ASH is appended to the key. On odd iterations, a character from the NSH are appended to the key (again with a 1/10 chance of this
+	character getting omitted). Ideally, the pattern of the first component will read NANAN, with the 1/10 chance of ANAN, the 1/100 chance
+	of AAN, and the 1/1000 chance of AA. 
+
+	Examples: 3u3f3 4r8d8 s6l6 j4y
+
+# Component 2
+	Component 2 not only has an unfixed length, it's value and therefore length are inheritantly dependent upon that of component 1.
+	First of all, it's length range can be determined initially with the first logical operation that helps to determine the algorithm
+	used to calculate the component's value. Therefore, the pattern of component 2 is unpredictable. To determine the function, the algorithm
+	uses a single check to identify whether the length of the first component is 4 (as opposed to 2, 3, or 5). If this is the case, then an algorithm
+	similar to the first algorithm is executed. The same loop of 4 iterations is used in which even iterations append ASH characters, and odd iterations
+	yield NSH characters. The difference here, is that even or odd iterations are treated as different cases, while in component 1, the even case
+	is checked, then the odd case is run (unless the even case runs, in which case a new iteration is started). Therefore, effectively the component
+	functions are the exact same in result. 
+
+	If the length of the first component is NOT 4, the value of component 1 is used to determine the value of component 2. In this case, the algorithm goes
+	as such: First, a single NSH character is appended to the componenet. Then, the algorithm computes the characters of component 1 in order and stores this as
+	s. Then, the characters of s are reversed and appended to the second component. 
+
+	Examples (including first component): 3sp5-t8y1 i2y4-y3s4 5x6l8-3l6x5 8k7m8-6m7k8 m4y-74m 6o4d-xe
+
+# Component 3 and 4
+	Component 3 has unfixed length (1/100000000 (one in one-hundred-million) chance of 0-length component)
+	Component 4 has fixed length of 7
+	Next, a component of 8 NSH characters is calculated, followed by a 7 ASH character component. These are both stored. 
+	The 8-character component (component 3), calculates 8 NSH characters (again with '0' characters omitted). 
+	The 7-character component (component 4), calculates 7 ASH characters (with no omits)
+
+# Component 5
+	Component 5 also has an unfixed length. However, the value of component 5 can always be predicted using the values
+	of component 3 and 4. Fortunately, it is a little harder to recognize the pattern of component 5. Initially, the first
+	character of component 4 is appended as the first character of component 5. Next, the second character of C3 is appended.
+	Next, the third character of C4 is appended. This pattern is continued then the value is reversed and appended to the end.
+
+	This algorithm can also be calculated as so: A loop of 7 iterations is issued, with iteration number (i). Starting with the ith (0) index
+	of component 3, every other character is appended to the 5th component, alternating from taking the ith character from componennts 3 and 4.
+	This string is then reversed and used as the 5th component.
+
+# Component 6
+	Component 6 has an unfixed length, but will always range from 8 to 9 characters in length. The component is calculated as such:
+	A loop of 4 iterations is issued. On each iteration, first an SSH character is appended, followed by an ASH character. Afterwards,
+	an NSH character is appended (with a '0' character omitted).
+
+# Component 7
+	Component 7 is calculated by reversing component 3. Literally, the reversed value of component 3 is the value of component 7.
+
+# Component 8
+	The final component has an unfixed length. A loop of 8 iterations is issued, beginning with appending a single ASH character, then every other
+	character alternates between an NSH and ASH character (with all '0' characters omitted).
+
+THE END

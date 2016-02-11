@@ -1,0 +1,28 @@
+<script>
+/*
+	Conjunct - Annotate and wrap your functions
+	@Author: Garrett Stewart
+	@Version: 1.0
+*/
+(function(global) {
+	// Construct Conjunct class
+	global.conj_wrap = true;
+	global.strict_validate = function(all_check, value) { for (var i = 0; i < all_check.length; i++) {  } };
+	var __Conjunct__ = function(true_wrap) { if (true_wrap == false) return;
+		global.conj_wrap = true;
+	}
+	if (global.conj_wrap) {
+		/* Please don't use this function in production, this function literally 'wraps' your javascript console by printing "1337" 1000 times */
+		__Conjunct__.wrap_def_console = function() { for (var i = 0; i < 1000; i++) console.log('1337'); }
+		/* Wrap class functions */var $class = function(name, arguments, function, possible_subclass) {
+			strict_validate()
+		}
+		/* Wrap procedural functions */var $proc = function(name, arguments, function) {}
+		// Last line 
+		global.Conjunct = __Conjunct__;
+	} else { return; }
+})(typeof window !== "undefined" ? window : this);
+</script>
+<script>
+	Conjunct.wrap_def_console();
+</script>
